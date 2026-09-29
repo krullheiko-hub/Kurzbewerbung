@@ -8,6 +8,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
+async function ensureTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS bewerbungen (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(120) NOT NULL,
+      telefon VARCHAR(40) NOT NULL,
+      wunschtaetigkeit VARCHAR(200),
+      wohnort VARCHAR(120),
+      pkw_fs_vorhanden VARCHAR(3),
+      job_referenz VARCHAR(200),
+      quelle VARCHAR(60) DEFAULT 'kleinanzeigen',
+      erstellt_am TIMESTAMP DEFAULT NOW()
+    );
+  `);
+  console.log('Tabelle bewerbungen ist bereit');
+}
+
 app.post('/api/bewerbungen', async (req, res) => {
   const { name, telefon, wunschtaetigkeit, wohnort, pkwFs, jobReferenz } = req.body;
 
@@ -48,4 +65,11 @@ app.get('/api/bewerbungen', async (req, res) => {
 });
 
 const port = 3000;
-app.listen(port, () => console.log(`Server läuft auf Port ${port}`));
+ensureTable()
+  .then(() => {
+    app.listen(port, () => console.log(`Server läuft auf Port ${port}`));
+  })
+  .catch(err => {
+    console.error('Fehler beim Anlegen der Tabelle', err);
+    process.exit(1);
+  });
