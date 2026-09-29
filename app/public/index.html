@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jetzt bewerben</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 24px; }
+  .card { background: #fff; max-width: 420px; margin: 0 auto; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  h1 { font-size: 20px; margin-top: 0; }
+  label { display: block; margin-top: 14px; font-size: 14px; color: #333; }
+  input, select { width: 100%; padding: 10px; margin-top: 4px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+  button { width: 100%; margin-top: 20px; padding: 14px; background: #1a73e8; color: #fff; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+  button:disabled { background: #999; }
+  .status { margin-top: 14px; font-size: 14px; text-align: center; }
+  .ok { color: green; }
+  .err { color: #c0392b; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Interesse an der Stelle</h1>
+  <form id="bewForm">
+    <label>Name
+      <input type="text" name="name" required>
+    </label>
+    <label>Telefonnummer
+      <input type="tel" name="telefon" required>
+    </label>
+    <label>Wunschtätigkeit
+      <input type="text" name="wunschtaetigkeit">
+    </label>
+    <label>Wohnort
+      <input type="text" name="wohnort">
+    </label>
+    <label>PKW und FS vorhanden
+      <select name="pkwFs" required>
+        <option value="">Bitte wählen</option>
+        <option value="Ja">Ja</option>
+        <option value="Nein">Nein</option>
+      </select>
+    </label>
+    <input type="hidden" name="jobReferenz" value="STELLE_HIER_EINTRAGEN">
+    <button type="submit">Jetzt absenden</button>
+  </form>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+const form = document.getElementById('bewForm');
+const status = document.getElementById('status');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const button = form.querySelector('button');
+  button.disabled = true;
+  status.textContent = '';
+
+  const data = {
+    name: form.name.value,
+    telefon: form.telefon.value,
+    wunschtaetigkeit: form.wunschtaetigkeit.value,
+    wohnort: form.wohnort.value,
+    pkwFs: form.pkwFs.value,
+    jobReferenz: form.jobReferenz.value
+  };
+
+  try {
+    const res = await fetch('/api/bewerbungen', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+      status.textContent = 'Danke, wir melden uns bei Ihnen.';
+      status.className = 'status ok';
+      form.reset();
+    } else {
+      throw new Error('Serverfehler');
+    }
+  } catch (err) {
+    status.textContent = 'Es gab ein Problem, bitte später erneut versuchen.';
+    status.className = 'status err';
+  } finally {
+    button.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eingegangene Bewerbungen</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 24px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; font-size: 14px; }
+  th { background: #f4f4f4; }
+</style>
+</head>
+<body>
+<h1>Eingegangene Bewerbungen</h1>
+<table id="tabelle">
+  <thead>
+    <tr><th>Name</th><th>Telefon</th><th>Wunschtätigkeit</th><th>Wohnort</th><th>PKW und FS</th><th>Stelle</th><th>Eingegangen am</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+fetch('/api/bewerbungen')
+  .then(r => r.json())
+  .then(rows => {
+    const body = document.querySelector('#tabelle tbody');
+    rows.forEach(r => {
+      const tr = document.createElement('tr');
+      const datum = new Date(r.erstellt_am).toLocaleString('de-DE');
+      tr.innerHTML = `<td>${r.name}</td><td>${r.telefon}</td><td>${r.wunschtaetigkeit || ''}</td><td>${r.wohnort || ''}</td><td>${r.pkw_fs_vorhanden || ''}</td><td>${r.job_referenz || ''}</td><td>${datum}</td>`;
+      body.appendChild(tr);
+    });
+  });
+</script>
+</body>
+</html>
